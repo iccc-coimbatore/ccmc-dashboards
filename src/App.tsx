@@ -12,6 +12,7 @@ import { DashboardApp } from './types';
 import { INITIAL_APPS } from './data/defaultApps';
 import { AppCard } from './components/AppCard';
 import { AddAppModal } from './components/AddAppModal';
+import { deleteApp, createApp, updateApp } from './lib/appsApi';
 
 const LOCAL_STORAGE_KEY = 'iccc_dashboard_apps_v2';
 const LEGACY_STORAGE_KEY = 'workspace_dashboard_apps_v1';
@@ -120,6 +121,7 @@ export default function App() {
           item.id === editingId ? { ...item, ...appData } : item
         )
       );
+      updateApp(editingId, appData).catch(() => {});
     } else {
       const newApp: DashboardApp = {
         ...appData,
@@ -128,6 +130,7 @@ export default function App() {
         isFavorite: false,
       };
       setApps((prev) => [newApp, ...prev]);
+      createApp(newApp).catch(() => {});
     }
   };
 
@@ -145,6 +148,8 @@ export default function App() {
   const handleDeleteApp = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
     setApps((prev) => prev.filter((app) => app.id !== id));
+    // Best-effort sync to server (app still removed locally if API is down)
+    deleteApp(id).catch(() => {});
   };
 
   // Edit app handler

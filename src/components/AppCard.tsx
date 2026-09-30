@@ -120,6 +120,7 @@ export const AppCard: React.FC<AppCardProps> = ({
 }) => {
   const [showMenu, setShowMenu] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   // Each card receives a rich full color palette based on its index
   const palette = FULL_COLOR_PALETTES[index % FULL_COLOR_PALETTES.length];
@@ -189,6 +190,19 @@ export const AppCard: React.FC<AppCardProps> = ({
               />
             </button>
 
+            {/* Direct delete button */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowMenu(false);
+                setConfirmDelete(true);
+              }}
+              className="p-1.5 rounded-lg text-white/75 hover:text-white hover:bg-rose-500/40 transition-colors"
+              title="Delete dashboard"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+
             {/* More options menu */}
             <div className="relative">
               <button
@@ -240,8 +254,9 @@ export const AppCard: React.FC<AppCardProps> = ({
                     </button>
                     <button
                       onClick={(e) => {
+                        e.stopPropagation();
                         setShowMenu(false);
-                        onDeleteApp(app.id, e);
+                        setConfirmDelete(true);
                       }}
                       className="w-full px-3 py-2 text-left text-rose-600 hover:bg-rose-50 flex items-center gap-2 font-medium"
                     >
@@ -266,6 +281,48 @@ export const AppCard: React.FC<AppCardProps> = ({
           <ExternalLink className="w-3.5 h-3.5 text-white transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
         </div>
       </div>
+
+      {/* Delete confirmation overlay */}
+      {confirmDelete && (
+        <div
+          onClick={(e) => e.stopPropagation()}
+          className="absolute inset-0 z-40 rounded-2xl bg-slate-950/75 backdrop-blur-sm flex flex-col items-center justify-center gap-3 p-5 text-center"
+        >
+          <div className="w-10 h-10 rounded-full bg-rose-500/25 border border-rose-400/40 flex items-center justify-center shrink-0">
+            <Trash2 className="w-5 h-5 text-rose-200" />
+          </div>
+          <div>
+            <p className="text-sm font-bold text-white leading-snug break-words">
+              Delete "{app.name}"?
+            </p>
+            <p className="text-[11px] text-white/70 mt-1 leading-relaxed">
+              This dashboard will be removed permanently.
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setConfirmDelete(false);
+              }}
+              className="px-3.5 py-1.5 text-xs font-medium rounded-lg bg-white/15 hover:bg-white/25 text-white transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setConfirmDelete(false);
+                onDeleteApp(app.id, e);
+              }}
+              className="px-3.5 py-1.5 text-xs font-semibold rounded-lg bg-rose-600 hover:bg-rose-500 text-white transition-colors flex items-center gap-1.5"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              Delete
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
